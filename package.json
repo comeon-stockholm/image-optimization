@@ -1,0 +1,27 @@
+{
+  "name": "image-optimization",
+  "version": "1.0.0",
+  "description": "Serverless Image Optimization for Comeon Group Products",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/comeon-stockholm/image-optimization.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/comeon-stockholm/image-optimization/issues"
+  },
+  "homepage": "https://github.com/comeon-stockholm/image-optimization#readme",
+  "dependencies": {
+    "async": "^3.2.0",
+    "aws-sdk": "^2.642.0",
+    "path": "^0.12.7",
+    "sharp": "^0.25.1",
+    "util": "^0.12.2"
+  }
+}
