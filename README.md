@@ -1,6 +1,7 @@
 # Image-Optimization
 
-Script will generate below formats
+The code will generate below formats
+
 ```
 jpg
 png
@@ -14,7 +15,15 @@ webp
 
 ## How to run locally
 ```
-yarn install
+npm install
 
-yarn test
+npm run test
+```
+
+## Build for AWS
+
+```
+npm install
+rm -rf node_modules/sharp
+npm install --arch=x64 --platform=linux sharp
 ```
