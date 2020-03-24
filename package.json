@@ -1,6 +1,6 @@
 {
   "name": "image-optimization",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Serverless Image Optimization for Comeon Group Products",
   "main": "index.js",
   "scripts": {
