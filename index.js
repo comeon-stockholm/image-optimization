@@ -1,7 +1,7 @@
 const async = require('async');
 const path = require('path');
 const AWS = require('aws-sdk');
-// const util = require('util');
+const util = require('util');
 const sharp = require('sharp');
 // get reference to s3 client
 const s3 = new AWS.S3();
@@ -17,11 +17,19 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
     log('srcFolder:\n', srcFolder);
     log('srcFile:\n', srcFile);
     log('dstBucket\n', dstBucket);
+    log('imageType\n', imageType);
 
-    if (imageType == 'jpg' || imageType == 'jpeg' || imageType == 'png') {
+    if (
+        imageType == '.jpg' ||
+        imageType == '.jpeg' ||
+        imageType == '.png' ||
+        imageType == '.gif' ||
+        imageType == '.swf' ||
+        imageType == '.eps'
+    ) {
         log('imageType to be processed:\n', imageType);
     } else {
-        log('skipping non-image type: ' + srcKey);
+        log(`skipping non-image type: ${srcKey}`);
         return;
     }
 
@@ -60,19 +68,19 @@ exports.handler = async (event, context) => {
     log('Reading options from event:\n', util.inspect(event, { depth: 5 }));
 
     const { s3: s3Obj } = event.Records[0];
-    const srcBucket = s3Obj.s3.bucket.name;
+    const srcBucket = s3Obj.bucket.name;
     // the suffix -srcset is used for destination bucket
     const dstBucket = srcBucket + '-srcset';
     // Object key may have spaces or unicode non-ASCII characters.
-    const srcKey = decodeURIComponent(s3Obj.s3.object.key.replace(/\+/g, ' '));
+    const srcKey = decodeURIComponent(s3Obj.object.key.replace(/\+/g, ' '));
 
     //find filename
-    const extension = path.extname(srcKey);
-    const srcFile = path.basename(srcKey, extension);
+    const imageType = path.extname(srcKey);
+    const srcFile = path.basename(srcKey, imageType);
     const srcFolder = path.dirname(srcKey);
-    const size = s3Obj.s3.object.size;
+    const size = s3Obj.object.size;
     if (size > 0) {
-        await processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, extension);
+        await processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, imageType);
     } else {
         log(`size of s3 object is zero ${srcKey}`);
     }
