@@ -82,10 +82,10 @@ exports.handler = async event => {
     const size = s3Obj.object.size;
     if (size > 0) {
         await processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, imageType).catch(err => {
-            log('error: ', err);
+            log('Error: ', err);
         });
     } else {
-        log(`size of s3 object is zero ${srcKey}`);
+        log(`Error size of s3 object is zero ${srcKey}`);
     }
 };
 

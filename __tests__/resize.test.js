@@ -1,14 +1,13 @@
 var AWS = require('aws-sdk');
 var fs = require('fs');
-var async = require('async');
 
 var cacheControlIn;
 var cacheControlOut;
 
-var consoleLogger = console.log;
+var consoleLogger = console.log; //(...args) => console.log(...args);
 
 console.log = function(arg) {
-    if (arg.startsWith('---->')) {
+    if (arg.startsWith('Successfully') || arg.startsWith('Error')) {
         consoleLogger(arg);
     }
 };
@@ -49,7 +48,7 @@ var tests = [
         '__tests__/testdata/out',
         'mobile-icon',
         'mobile-icon-aloha',
-        'png',
+        '.png',
     ],
     [
         '__tests__/testdata/in/Mobile-luckyzoiac.jpg',
@@ -57,7 +56,7 @@ var tests = [
         '__tests__/testdata/out',
         'mobile-icon',
         'Mobile-luckyzoiac',
-        'png',
+        '.png',
     ],
     [
         '__tests__/testdata/in/templateMobile-icon.jpg',
@@ -65,7 +64,7 @@ var tests = [
         '__tests__/testdata/out',
         'mobile-icon',
         'templateMobile-icon',
-        'png',
+        '.png',
     ],
     [
         '__tests__/testdata/in/Mobile-Icon-bloodsuckers.png',
@@ -73,58 +72,55 @@ var tests = [
         '__tests__/testdata/out',
         'mobile-icon',
         'mobile-icon-bloodsuckers.jpg',
-        'png',
+        '.png',
     ],
 ];
 
-async.waterfall(
-    [
-        async function testCustomSizes(next) {
-            consoleLogger('\nTesting custom sizes');
-            cacheControlOut = 'max-age=31536000';
-            // var putObject = AWS.S3.prototype.putObject;
-            var puts = [];
-            // AWS.S3.prototype.putObject = function(req) {
-            //     puts.push(req.Key);
-            //     consoleLogger('custom sized image: ' + req.Key + ' size in bytes: ' + req.Body.length);
-            //     return { promise: () => Promise.resolve() };
-            // };
-            var value = tests[0];
+async function testCustomSizes() {
+    consoleLogger('\nTesting custom sizes');
+    cacheControlOut = 'max-age=31536000';
+    var value = tests[0];
+    await lambda.processImage(value[0], value[1], value[2], value[3], value[4], value[5]);
+}
+async function testDefaultProcess() {
+    consoleLogger('\nTesting default conversions');
+    cacheControlIn = undefined;
+    cacheControlOut = 'max-age=31536000';
+    async function doTest(testarr) {
+        var value = testarr.shift();
+        if (value) {
             await lambda.processImage(value[0], value[1], value[2], value[3], value[4], value[5]);
-            // next();
-        },
-        async function testDefaultProcess(next) {
-            consoleLogger('\nTesting default conversions');
-            cacheControlIn = undefined;
-            cacheControlOut = 'max-age=31536000';
-            async function doTest(testarr) {
-                var value = testarr.shift();
-                if (value) {
-                    await lambda.processImage(value[0], value[1], value[2], value[3], value[4], value[5]);
-                    await doTest(testarr);
-                }
-            }
-            await doTest(tests.slice());
-        },
-        async function testMaxAgeOverride(next) {
-            consoleLogger('\nTesting max age override');
-            cacheControlIn = 'max-age=0';
-            cacheControlOut = 'max-age=0';
-            var value = tests[0];
-            await lambda.processImage(value[0], value[1], value[2], value[3], value[4], value[5]);
-        },
-        async function testCacheControlFail(next) {
-            consoleLogger('\nTest exception handling');
-            // fail if Cache-Control differs
-            cacheControlIn = 'max-age=0';
-            cacheControlOut = 'max-age=1';
-            var value = tests[0];
-            await lambda.processImage(value[0], value[1], value[2], value[3], value[4], value[5]);
-        },
-    ],
-    function(err) {
-        if (err) {
-            consoleLogger(err);
+            await doTest(testarr);
         }
     }
-);
+    await doTest(tests.slice());
+}
+async function testMaxAgeOverride() {
+    consoleLogger('\nTesting max age override');
+    cacheControlIn = 'max-age=0';
+    cacheControlOut = 'max-age=0';
+    var value = tests[0];
+    await lambda.processImage(value[0], value[1], value[2], value[3], value[4], value[5]);
+    testCacheControlFail();
+}
+async function testCacheControlFail() {
+    consoleLogger('\nTest exception handling');
+    // fail if Cache-Control differs
+    cacheControlIn = 'max-age=0';
+    cacheControlOut = 'max-age=1';
+    var value = tests[0];
+    await lambda.processImage(value[0], value[1], value[2], value[3], value[4], value[5]);
+}
+
+function catchError(err) {
+    if (err) {
+        consoleLogger(`Error ${err}`);
+    }
+}
+
+(async () => {
+    await testCustomSizes().catch(catchError);
+    await testDefaultProcess().catch(catchError);
+    await testMaxAgeOverride().catch(catchError);
+    await testCacheControlFail().catch(catchError);
+})();
