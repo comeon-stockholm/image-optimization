@@ -1,13 +1,13 @@
-const async = require('async');
 const path = require('path');
 const AWS = require('aws-sdk');
 const util = require('util');
 const sharp = require('sharp');
 // get reference to s3 client
 const s3 = new AWS.S3();
-
+// getting configurations from config file
+// later can move to environment varibale make this a default fallback
 const { sizesArray, formats } = require('./config');
-
+// default cache if cache is not set
 const DEFAULT_CACHE_CONTROL = 'max-age=31536000';
 
 // Image processing
@@ -19,6 +19,7 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
     log('dstBucket\n', dstBucket);
     log('imageType\n', imageType);
 
+    // checking if the file is an image else skip processing
     if (
         imageType == '.jpg' ||
         imageType == '.jpeg' ||
@@ -63,7 +64,7 @@ function log(...args) {
     console.log(...args);
 }
 
-exports.handler = async (event, context) => {
+exports.handler = async event => {
     // Read options from the event.
     log('Reading options from event:\n', util.inspect(event, { depth: 5 }));
 
@@ -80,7 +81,9 @@ exports.handler = async (event, context) => {
     const srcFolder = path.dirname(srcKey);
     const size = s3Obj.object.size;
     if (size > 0) {
-        await processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, imageType);
+        await processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, imageType).catch(err => {
+            log('error: ', err);
+        });
     } else {
         log(`size of s3 object is zero ${srcKey}`);
     }
