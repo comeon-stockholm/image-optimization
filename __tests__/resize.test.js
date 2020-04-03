@@ -118,9 +118,22 @@ function catchError(err) {
     }
 }
 
+function removeTestFiles() {
+    fs.readdirSync('./__tests__/testdata/out').forEach(path => {
+        if (fs.statSync(`./__tests__/testdata/out/${path}`).isDirectory()) {
+            fs.readdirSync(`./__tests__/testdata/out/${path}`).forEach(file => {
+                if (file.match(/([\w])*\.(?:jpg|webp|png)/g)) {
+                    fs.unlinkSync(`./__tests__/testdata/out/${path}/${file}`);
+                }
+            });
+        }
+    });
+}
+
 (async () => {
     await testCustomSizes().catch(catchError);
     await testDefaultProcess().catch(catchError);
     await testMaxAgeOverride().catch(catchError);
     await testCacheControlFail().catch(catchError);
+    removeTestFiles();
 })();
