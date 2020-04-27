@@ -6,7 +6,7 @@ const sharp = require('sharp');
 const s3 = new AWS.S3();
 // getting configurations from config file
 // later can move to environment varibale make this a default fallback
-const { sizesArray, formats } = require('./config');
+let { sizesArray, formats } = require('./config');
 // default cache if cache is not set
 const DEFAULT_CACHE_CONTROL = 'max-age=31536000';
 
@@ -34,18 +34,20 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
         return;
     }
 
+    if (!srcBucket.includes('/background/')) {
+        sizesArray = sizesArray.filter((f) => f.width !== 1080);
+    }
+
     const response = await s3.getObject({ Bucket: srcBucket, Key: srcKey }).promise();
     const cacheControl = response.CacheControl || DEFAULT_CACHE_CONTROL;
     const image = sharp(response.Body);
+
     for (const size of sizesArray) {
         const dstnPath = size.destinationPath;
         const sourceFolder = srcFolder.length > 0 ? srcFolder + '/' : '';
         for (const { format, contentType, options } of formats) {
             const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
-            const result = await image
-                .resize(size.width, null)
-                .toFormat(format, options)
-                .toBuffer();
+            const result = await image.resize(size.width, null).toFormat(format, options).toBuffer();
             await s3
                 .putObject({
                     Bucket: dstBucket,
@@ -64,7 +66,7 @@ function log(...args) {
     console.log(...args);
 }
 
-exports.handler = async event => {
+exports.handler = async (event) => {
     // Read options from the event.
     log('Reading options from event:\n', util.inspect(event, { depth: 5 }));
 
@@ -81,7 +83,7 @@ exports.handler = async event => {
     const srcFolder = path.dirname(srcKey);
     const size = s3Obj.object.size;
     if (size > 0) {
-        await processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, imageType).catch(err => {
+        await processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, imageType).catch((err) => {
             log('Error: ', err);
         });
     } else {

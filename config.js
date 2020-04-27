@@ -1,5 +1,6 @@
 // setting image sizes to be created
 
+const _1080px = { width: 1080, destinationPath: '1080w' };
 const _640px = { width: 640, destinationPath: '640w' };
 const _480px = { width: 480, destinationPath: '480w' };
 const _420px = { width: 420, destinationPath: '420w' };
@@ -35,5 +36,5 @@ const webp = {
     },
 };
 
-exports.sizesArray = [_640px, _480px, _420px, _360px, _300px, _240px, _180px, _140px];
+exports.sizesArray = [_1080px, _640px, _480px, _420px, _360px, _300px, _240px, _180px, _140px];
 exports.formats = [jpg, png, webp];

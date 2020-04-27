@@ -6,18 +6,18 @@ var cacheControlOut;
 
 var consoleLogger = console.log; //(...args) => console.log(...args);
 
-console.log = function(arg) {
+console.log = function (arg) {
     if (arg.startsWith('Successfully') || arg.startsWith('Error')) {
         consoleLogger(arg);
     }
 };
 
-AWS.S3.prototype.getObject = function(req) {
+AWS.S3.prototype.getObject = function (req) {
     return {
         promise: () => Promise.resolve({ Body: req.Bucket, ContentType: 'image/jpeg', CacheControl: cacheControlIn }),
     };
 };
-AWS.S3.prototype.putObject = function(req) {
+AWS.S3.prototype.putObject = function (req) {
     if (!req.CacheControl) {
         console.log('CacheControl not set!');
         return { promise: () => Promise.reject('CacheControl not set!') };
@@ -42,6 +42,14 @@ AWS.S3.prototype.putObject = function(req) {
 };
 var lambda = require('../index.js');
 var tests = [
+    [
+        '__tests__/testdata/in/background/aloha_mobile_html_sw.png',
+        'Mobile-bla.png',
+        '__tests__/testdata/out/',
+        'mobile-icon',
+        'mobile-icon-aloha',
+        '.png',
+    ],
     [
         '__tests__/testdata/in/aloha_mobile_html_sw.png',
         'Mobile-bla.png',
@@ -119,9 +127,9 @@ function catchError(err) {
 }
 
 function removeTestFiles() {
-    fs.readdirSync('./__tests__/testdata/out').forEach(path => {
+    fs.readdirSync('./__tests__/testdata/out').forEach((path) => {
         if (fs.statSync(`./__tests__/testdata/out/${path}`).isDirectory()) {
-            fs.readdirSync(`./__tests__/testdata/out/${path}`).forEach(file => {
+            fs.readdirSync(`./__tests__/testdata/out/${path}`).forEach((file) => {
                 if (file.match(/([\w])*\.(?:jpg|webp|png)/g)) {
                     fs.unlinkSync(`./__tests__/testdata/out/${path}/${file}`);
                 }
