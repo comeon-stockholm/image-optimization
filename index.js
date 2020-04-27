@@ -34,7 +34,7 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
         return;
     }
 
-    if (!srcBucket.includes('/background/')) {
+    if (!srcKey.includes('/background/')) {
         sizesArray = sizesArray.filter((f) => f.width !== 1080);
     }
 
