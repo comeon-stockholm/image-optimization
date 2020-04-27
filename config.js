@@ -1,5 +1,7 @@
 // setting image sizes to be created
 
+const _4096px = { width: 4096, destinationPath: '4096w' };
+const _2560px = { width: 2560, destinationPath: '2560w' };
 const _1080px = { width: 1080, destinationPath: '1080w' };
 const _640px = { width: 640, destinationPath: '640w' };
 const _480px = { width: 480, destinationPath: '480w' };
@@ -36,5 +38,7 @@ const webp = {
     },
 };
 
-exports.sizesArray = [_1080px, _640px, _480px, _420px, _360px, _300px, _240px, _180px, _140px];
+exports.backgroundOnly = [4096, 2560, 1080];
+
+exports.sizesArray = [_4096px, _2560px, _1080px, _640px, _480px, _420px, _360px, _300px, _240px, _180px, _140px];
 exports.formats = [jpg, png, webp];

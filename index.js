@@ -6,7 +6,7 @@ const sharp = require('sharp');
 const s3 = new AWS.S3();
 // getting configurations from config file
 // later can move to environment varibale make this a default fallback
-let { sizesArray, formats } = require('./config');
+const { sizesArray, formats, backgroundOnly } = require('./config');
 // default cache if cache is not set
 const DEFAULT_CACHE_CONTROL = 'max-age=31536000';
 
@@ -34,15 +34,15 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
         return;
     }
 
-    if (!srcKey.includes('/background/')) {
-        sizesArray = sizesArray.filter((f) => f.width !== 1080);
-    }
+    let sizes = srcKey.includes('/background/')
+        ? sizesArray
+        : sizesArray.filter((s) => !backgroundOnly.includes(s.width));
 
     const response = await s3.getObject({ Bucket: srcBucket, Key: srcKey }).promise();
     const cacheControl = response.CacheControl || DEFAULT_CACHE_CONTROL;
     const image = sharp(response.Body);
 
-    for (const size of sizesArray) {
+    for (const size of sizes) {
         const dstnPath = size.destinationPath;
         const sourceFolder = srcFolder.length > 0 ? srcFolder + '/' : '';
         for (const { format, contentType, options } of formats) {
