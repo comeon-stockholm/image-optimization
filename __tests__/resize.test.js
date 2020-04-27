@@ -45,7 +45,7 @@ var tests = [
     [
         '__tests__/testdata/in/background/aloha_mobile_html_sw.png',
         'Mobile-bla.png',
-        '__tests__/testdata/out/',
+        '__tests__/testdata/out',
         'mobile-icon',
         'mobile-icon-aloha',
         '.png',
