@@ -2,11 +2,17 @@ const path = require('path');
 const AWS = require('aws-sdk');
 const util = require('util');
 const sharp = require('sharp');
+var fs = require('fs');
+const resizeImg = require('resize-img');
+const execa = require('execa');
+const mozjpeg = require('mozjpeg');
+
 // get reference to s3 client
 const s3 = new AWS.S3();
 // getting configurations from config file
 // later can move to environment varibale make this a default fallback
 const { sizesArray, formats, backgroundOnly } = require('./config');
+
 // default cache if cache is not set
 const DEFAULT_CACHE_CONTROL = 'max-age=31536000';
 
@@ -41,13 +47,29 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
     const response = await s3.getObject({ Bucket: srcBucket, Key: srcKey }).promise();
     const cacheControl = response.CacheControl || DEFAULT_CACHE_CONTROL;
     const image = sharp(response.Body);
+    const imageBuffer = fs.readFileSync(response.Body);
 
     for (const size of sizes) {
         const dstnPath = size.destinationPath;
         const sourceFolder = srcFolder.length > 0 ? srcFolder + '/' : '';
         for (const { format, contentType, options } of formats) {
             const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
-            const result = await image.resize(size.width, null).toFormat(format, options).toBuffer();
+            let result;
+            if (format === 'jpg' || format === 'jpeg') {
+                const resizedImageBuffer = await resizeImg(imageBuffer, {
+                    width: size.width,
+                    height: null,
+                });
+                const { stdout } = await execa(mozjpeg, options, {
+                    encoding: null,
+                    input: resizedImageBuffer,
+                    maxBuffer: Infinity,
+                });
+                result = stdout;
+            } else {
+                result = await image.resize(size.width, null).toFormat(format, options).toBuffer();
+            }
+
             await s3
                 .putObject({
                     Bucket: dstBucket,

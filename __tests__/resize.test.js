@@ -71,7 +71,7 @@ var tests = [
         'Mobile-bla.png',
         '__tests__/testdata/out',
         'mobile-icon',
-        'mobile-icon-bloodsuckers.jpg',
+        'mobile-icon-bloodsuckers',
         '.png',
     ],
 ];
