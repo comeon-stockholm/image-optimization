@@ -113,12 +113,12 @@ async function testCacheControlFail() {
 }
 
 const backgroundImageSource = [
-    '__tests__/testdata/in/aloha_mobile_html_sw.png',
-    '/background/Mobile-bla.png',
+    '__tests__/testdata/in/Mobile-luckyzoiac.jpg',
+    '/background/Mobile-bla.jpg',
     '__tests__/testdata/out',
     'mobile-icon',
-    'mobile-icon-aloha',
-    '.png',
+    'Mobile-luckyzoiac',
+    '.jpg',
 ];
 
 async function testbackgroundImageSource() {
