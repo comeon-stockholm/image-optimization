@@ -1,35 +1,39 @@
 {
-  "name": "image-optimization",
-  "version": "1.0.1",
-  "description": "Serverless Image Optimization for Comeon Group Products",
-  "main": "index.js",
-  "scripts": {
-    "test": "node __tests__/resize.test.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/comeon-stockholm/image-optimization.git"
-  },
-  "keywords": [],
-  "contributors": [
-    {
-      "name": "Velu S Gautam",
-      "email": "i@velusgautam.com"
+    "name": "image-optimization",
+    "version": "1.0.1",
+    "description": "Serverless Image Optimization for Comeon Group Products",
+    "main": "index.js",
+    "scripts": {
+        "test": "node __tests__/resize.test.js"
     },
-    {
-      "name": "P-a Bäckström",
-      "email": "per.anders.backstrom@comeon.com"
-    }
-  ],
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/comeon-stockholm/image-optimization/issues"
-  },
-  "homepage": "https://github.com/comeon-stockholm/image-optimization#readme",
-  "dependencies": {
-    "aws-sdk": "^2.711.0",
-    "path": "^0.12.7",
-    "sharp": "^0.25.4",
-    "util": "^0.12.3"
-  }
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/comeon-stockholm/image-optimization.git"
+    },
+    "keywords": [],
+    "contributors": [
+        {
+            "name": "Velu S Gautam",
+            "email": "i@velusgautam.com"
+        },
+        {
+            "name": "P-a Bäckström",
+            "email": "per.anders.backstrom@comeon.com"
+        }
+    ],
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/comeon-stockholm/image-optimization/issues"
+    },
+    "homepage": "https://github.com/comeon-stockholm/image-optimization#readme",
+    "dependencies": {
+        "aws-sdk": "^2.713.0",
+        "execa": "^4.0.3",
+        "mozjpeg": "^7.0.0",
+        "path": "^0.12.7",
+        "resize-img": "^2.0.0",
+        "sharp": "^0.25.4",
+        "util": "^0.12.3"
+    },
+    "devDependencies": {}
 }
