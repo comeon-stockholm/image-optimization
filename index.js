@@ -2,7 +2,7 @@ const path = require('path');
 const AWS = require('aws-sdk');
 const util = require('util');
 const sharp = require('sharp');
-var fs = require('fs');
+const fs = require('fs');
 const resizeImg = require('resize-img');
 const execa = require('execa');
 const mozjpeg = require('mozjpeg');
@@ -44,9 +44,13 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
         ? sizesArray
         : sizesArray.filter((s) => !backgroundOnly.includes(s.width));
 
+    // getting the soruce image from s3 bucket
     const response = await s3.getObject({ Bucket: srcBucket, Key: srcKey }).promise();
+    // getting cache control
     const cacheControl = response.CacheControl || DEFAULT_CACHE_CONTROL;
+    // creating shartp image blob using Sharp Library
     const image = sharp(response.Body);
+    // reading image into buffer using node fs
     const imageBuffer = fs.readFileSync(response.Body);
 
     for (const size of sizes) {
@@ -56,10 +60,12 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
             const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
             let result;
             if (format === 'jpg' || format === 'jpeg') {
+                // resizing image into resizedImageBuffer
                 const resizedImageBuffer = await resizeImg(imageBuffer, {
                     width: size.width,
                     height: null,
                 });
+                // compressing image using mozjpeg for size optimization
                 const { stdout } = await execa(mozjpeg, options, {
                     encoding: null,
                     input: resizedImageBuffer,
@@ -67,6 +73,7 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                 });
                 result = stdout;
             } else {
+                // compressing image for formats png ang webp
                 result = await image.resize(size.width, null).toFormat(format, options).toBuffer();
             }
 
