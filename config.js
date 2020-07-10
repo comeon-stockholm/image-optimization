@@ -14,11 +14,17 @@ const _140px = { width: 140, destinationPath: '140w' };
 const jpg = {
     format: 'jpg',
     contentType: 'image/jpeg',
-    options: {
-        quality: 75,
-        optimiseScans: true,
-        optimiseCoding: true,
-    },
+    options: [
+        '-quality',
+        70,
+        '-quant-table',
+        2,
+        '-optimize',
+        '-progressive',
+        '-notrellis',
+        '-notrellis-dc',
+        '-noovershoot',
+    ],
 };
 const png = {
     format: 'png',
