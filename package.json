@@ -31,7 +31,7 @@
         "execa": "^4.0.3",
         "mozjpeg": "^7.0.0",
         "path": "^0.12.7",
-        "resize-img": "^2.0.0",
+        "resize-image-buffer": "^1.0.0",
         "sharp": "^0.25.4",
         "util": "^0.12.3"
     },

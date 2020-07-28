@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 const util = require('util');
 const sharp = require('sharp');
 const fs = require('fs');
-const resizeImg = require('resize-img');
+const resizeImg = require('resize-image-buffer');
 const execa = require('execa');
 const mozjpeg = require('mozjpeg');
 
