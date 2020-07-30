@@ -44,7 +44,7 @@ var lambda = require('../index.js');
 var tests = [
     [
         '__tests__/testdata/in/aloha_mobile_html_sw.png',
-        'Mobile-bla.png',
+        'aloha_mobile_html_sw.png',
         '__tests__/testdata/out',
         'mobile-icon',
         'mobile-icon-aloha',
@@ -52,7 +52,7 @@ var tests = [
     ],
     [
         '__tests__/testdata/in/Mobile-luckyzoiac.jpg',
-        'Mobile-bla.png',
+        'Mobile-luckyzoiac.jpg',
         '__tests__/testdata/out',
         'mobile-icon',
         'Mobile-luckyzoiac',
@@ -60,7 +60,7 @@ var tests = [
     ],
     [
         '__tests__/testdata/in/templateMobile-icon.jpg',
-        'Mobile-bla.png',
+        'templateMobile-icon.jpg',
         '__tests__/testdata/out',
         'mobile-icon',
         'templateMobile-icon',
@@ -68,7 +68,7 @@ var tests = [
     ],
     [
         '__tests__/testdata/in/Mobile-Icon-bloodsuckers.png',
-        'Mobile-bla.png',
+        'Mobile-Icon-bloodsuckers.png',
         '__tests__/testdata/out',
         'mobile-icon',
         'mobile-icon-bloodsuckers',
