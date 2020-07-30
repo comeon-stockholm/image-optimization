@@ -43,14 +43,6 @@ AWS.S3.prototype.putObject = function (req) {
 var lambda = require('../index.js');
 var tests = [
     [
-        '__tests__/testdata/in/background/aloha_mobile_html_sw.png',
-        'Mobile-bla.png',
-        '__tests__/testdata/out/',
-        'mobile-icon',
-        'mobile-icon-aloha',
-        '.png',
-    ],
-    [
         '__tests__/testdata/in/aloha_mobile_html_sw.png',
         'Mobile-bla.png',
         '__tests__/testdata/out',
@@ -79,7 +71,7 @@ var tests = [
         'Mobile-bla.png',
         '__tests__/testdata/out',
         'mobile-icon',
-        'mobile-icon-bloodsuckers.jpg',
+        'mobile-icon-bloodsuckers',
         '.png',
     ],
 ];
@@ -120,6 +112,23 @@ async function testCacheControlFail() {
     await lambda.processImage(value[0], value[1], value[2], value[3], value[4], value[5]);
 }
 
+const backgroundImageSource = [
+    '__tests__/testdata/in/Mobile-luckyzoiac.jpg',
+    '/background/Mobile-bla.jpg',
+    '__tests__/testdata/out',
+    'mobile-icon',
+    'Mobile-luckyzoiac',
+    '.jpg',
+];
+
+async function testbackgroundImageSource() {
+    consoleLogger('\nTest backgroundImageSource');
+    cacheControlIn = 'max-age=0';
+    cacheControlOut = 'max-age=0';
+    var value = backgroundImageSource;
+    await lambda.processImage(value[0], value[1], value[2], value[3], value[4], value[5]);
+}
+
 function catchError(err) {
     if (err) {
         consoleLogger(`Error ${err}`);
@@ -143,5 +152,6 @@ function removeTestFiles() {
     await testDefaultProcess().catch(catchError);
     await testMaxAgeOverride().catch(catchError);
     await testCacheControlFail().catch(catchError);
+    await testbackgroundImageSource().catch(catchError);
     removeTestFiles();
 })();
