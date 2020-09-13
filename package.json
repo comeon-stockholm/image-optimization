@@ -28,7 +28,11 @@
     "homepage": "https://github.com/comeon-group/image-optimization#readme",
     "dependencies": {
         "aws-sdk": "^2.723.0",
+        "canvas": "^2.6.1",
+        "inkjet": "^2.1.2",
+        "node-fetch": "^2.6.1",
         "path": "^0.12.7",
+        "png-js": "^1.0.0",
         "sharp": "^0.25.4",
         "util": "^0.12.3"
     },

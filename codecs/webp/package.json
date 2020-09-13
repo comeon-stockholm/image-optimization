@@ -1,0 +1,9 @@
+{
+  "name": "webp",
+  "scripts": {
+    "build": "../build-cpp.sh"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}
