@@ -74,7 +74,7 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
     for (const size of sizes) {
         const image = await sharp(response.Body).resize(size.width, null);
         const buffer = await image.toBuffer();
-        await (async function (size, buffer) {
+        await (async function imageEncoder(size, buffer) {
             if (imageType === ".jpg" || imageType === ".jpeg") {
                 await new Promise(function (resolve, reject) {
                     inkjet.decode(buffer, async function (err, decoded) {
@@ -88,9 +88,8 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                                 let imageData = await module.encode(
                                     decoded.data,
                                     size.width,
-                                    size.width,
+                                    size.width, // need to find the exact height of image and pass here
                                     options);
-
                                 await s3
                                     .putObject({
                                         Bucket: dstBucket,
@@ -108,7 +107,7 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                                 let imageData = await module.encode(
                                     decoded.data,
                                     size.width,
-                                    size.width,
+                                    size.width,// need to find the exact height of image and pass here
                                     options);
                                 await s3
                                     .putObject({
@@ -127,7 +126,7 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                                 let imageData = await module.encode(
                                     decoded.data,
                                     size.width,
-                                    size.width,
+                                    size.width,// need to find the exact height of image and pass here
                                     options);
                                 await s3
                                     .putObject({
@@ -154,7 +153,11 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                             if (format === "avif") {
                                 const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
                                 let module = await avif_enc();
-                                let imageData = await module.encode(pixels, size.width, size.width, options);
+                                let imageData = await module.encode(pixels,
+                                    size.width,
+                                    size.width,// need to find the exact height of image and pass here
+                                    options
+                                );
                                 await s3.putObject({
                                     Bucket: dstBucket,
                                     Key: dstnKey,
@@ -166,7 +169,11 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                             } else if (format === "webp") {
                                 const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
                                 let module = await webp_enc();
-                                let imageData = await module.encode(pixels, size.width, size.width, options);
+                                let imageData = await module.encode(pixels,
+                                    size.width,
+                                    size.width,// need to find the exact height of image and pass here
+                                    options
+                                );
                                 await s3.putObject({
                                     Bucket: dstBucket,
                                     Key: dstnKey,

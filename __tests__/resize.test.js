@@ -58,23 +58,7 @@ var tests = [
         'mobile-icon',
         'Mobile-luckyzoiac',
         '.jpeg',
-    ],
-    [
-        '__tests__/testdata/in/templateMobile-icon.jpg',
-        'templateMobile-icon.jpg',
-        '__tests__/testdata/out',
-        'mobile-icon',
-        'templateMobile-icon',
-        '.jpg',
-    ],
-    [
-        '__tests__/testdata/in/Mobile-Icon-bloodsuckers.png',
-        'Mobile-Icon-bloodsuckers.png',
-        '__tests__/testdata/out',
-        'mobile-icon',
-        'mobile-icon-bloodsuckers',
-        '.png',
-    ],
+    ]
 ];
 
 async function testCustomSizes() {
@@ -155,6 +139,6 @@ function removeTestFiles() {
     await testDefaultProcess().catch(catchError);
     await testMaxAgeOverride().catch(catchError);
     await testbackgroundImageSource().catch(catchError);
-    // await testCacheControlFail().catch(catchError);
-    // removeTestFiles();
+    await testCacheControlFail().catch(catchError);
+    removeTestFiles();
 })();
