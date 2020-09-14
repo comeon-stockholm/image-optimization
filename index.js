@@ -50,7 +50,7 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
         const dstnPath = size.destinationPath;
         const sourceFolder = srcFolder.length > 0 ? srcFolder + '/' : '';
         for (const { format, contentType, options } of formats) {
-            const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
+            const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${(format === "jpg" && imageType === ".jpeg") ? "jpeg" : format}`;
             const result = await image.resize(size.width, null).toFormat(format, options).toBuffer();
             await s3
                 .putObject({

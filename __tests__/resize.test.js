@@ -51,12 +51,12 @@ var tests = [
         '.png',
     ],
     [
-        '__tests__/testdata/in/Mobile-luckyzoiac.jpg',
-        'Mobile-luckyzoiac.jpg',
+        '__tests__/testdata/in/Mobile-luckyzoiac.jpeg',
+        'Mobile-luckyzoiac.jpeg',
         '__tests__/testdata/out',
         'mobile-icon',
         'Mobile-luckyzoiac',
-        '.png',
+        '.jpeg',
     ],
     [
         '__tests__/testdata/in/templateMobile-icon.jpg',
@@ -64,7 +64,7 @@ var tests = [
         '__tests__/testdata/out',
         'mobile-icon',
         'templateMobile-icon',
-        '.png',
+        '.jpg',
     ],
     [
         '__tests__/testdata/in/Mobile-Icon-bloodsuckers.png',
@@ -113,12 +113,12 @@ async function testCacheControlFail() {
 }
 
 const backgroundImageSource = [
-    '__tests__/testdata/in/Mobile-luckyzoiac.jpg',
+    '__tests__/testdata/in/Mobile-luckyzoiac.jpeg',
     '/background/Mobile-bla.jpg',
     '__tests__/testdata/out',
     'mobile-icon',
     'Mobile-luckyzoiac',
-    '.jpg',
+    '.jpeg',
 ];
 
 async function testbackgroundImageSource() {
@@ -139,7 +139,7 @@ function removeTestFiles() {
     fs.readdirSync('./__tests__/testdata/out').forEach((path) => {
         if (fs.statSync(`./__tests__/testdata/out/${path}`).isDirectory()) {
             fs.readdirSync(`./__tests__/testdata/out/${path}`).forEach((file) => {
-                if (file.match(/([\w])*\.(?:jpg|webp|png)/g)) {
+                if (file.match(/([\w])*\.(?:jpg|jpeg|avif|webp|png)/g)) {
                     fs.unlinkSync(`./__tests__/testdata/out/${path}/${file}`);
                 }
             });
