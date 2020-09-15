@@ -4,7 +4,8 @@
     "description": "Serverless Image Optimization for Comeon Group Products",
     "main": "index.js",
     "scripts": {
-        "test": "node __tests__/resize.test.js"
+        "test": "node __tests__/resize.test.js",
+        "zip": "zip -r image-optimization-wasm.zip index.js config.js package.json node_modules codecs"
     },
     "repository": {
         "type": "git",
@@ -29,7 +30,6 @@
     "dependencies": {
         "aws-sdk": "^2.723.0",
         "inkjet": "^2.1.2",
-        "node-fetch": "^2.6.1",
         "path": "^0.12.7",
         "png-js": "^1.0.0",
         "sharp": "^0.25.4",

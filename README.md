@@ -1,10 +1,19 @@
-# Image-Optimization
+# Image-Optimization with Web Assembly Encoders
 
 The code will generate below formats
 
+Using the [squoosh](https://github.com/GoogleChromeLabs/squoosh/) 💥 encoders compiled to wasm + emscripten. We utilize wasm encoders for webp, avif and mozjpeg to encode our images and create optimized images.
+
+Using sharp~ library for resizing the image before encoding.
+
+Before encoding need to convert the image buffers to unit8Clipped pixels array for png and jpg for the wasm encoders to compress.
+
+We are getting awesome results for AVIF, WEBP and JPEG images 💡
+
 ```
+avif
 jpg
-png
+png±
 webp
 ```
 
@@ -12,6 +21,12 @@ and sizes
 
 ```
 640px, 480px, 420px, 360px, 300px, 240px, 180px, 140px
+```
+
+For Backgrounds
+
+```
+2560px, 1080px
 ```
 
 of an image
@@ -37,3 +52,7 @@ Create a zip file and upload to lamda
 ```
 zip -r image-optimization.zip index.js config.js package.json node_modules
 ```
+
+± Work in progress
+
+~ Can be changed to better encoders in future

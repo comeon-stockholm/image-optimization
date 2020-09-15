@@ -1,26 +1,17 @@
 const path = require('path');
 const AWS = require('aws-sdk');
 const util = require('util');
+// image compression encoders
 const sharp = require('sharp');
-// const fs = require('fs');
 const webp_enc = require('./codecs/webp/enc/webp_enc.js');
 const mozjpeg_enc = require('./codecs/mozjpeg_enc/mozjpeg_enc.js');
 const avif_enc = require('./codecs/avif/enc/avif_enc.js');
+
+// convert image to pixels
 const inkjet = require('inkjet');
-// const squoosh_resize_bg = require('./codecs/resize/pkg/squoosh_resize_bg.js');
 const PNG = require('png-js');
 
-// const EventEmitter = require('events');
 
-// class MyEmitter extends EventEmitter { }
-
-// const myEmitter = new MyEmitter();
-// // increase the limit
-// myEmitter.setMaxListeners(100);
-
-// const { createImageData } = require('canvas')
-// emitter.setMaxListeners();
-// get reference to s3 client
 const s3 = new AWS.S3();
 // getting configurations from config file
 // later can move to environment varibale make this a default fallback
@@ -28,12 +19,6 @@ const { sizesArray, formats, backgroundOnly } = require('./config');
 
 // default cache if cache is not set
 const DEFAULT_CACHE_CONTROL = 'max-age=31536000';
-
-// method: 'lanczos3',
-//   fitMethod: 'stretch',
-//   premultiply: true,
-//   linearRGB: true,
-// 'triangle', 'catrom', 'mitchell', 'lanczos3',
 
 // Image processing
 async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, imageType) {
@@ -65,31 +50,39 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
 
     // getting the soruce image from s3 bucket
     const response = await s3.getObject({ Bucket: srcBucket, Key: srcKey }).promise();
-    console.log('====================================');
-    console.log(response.Body);
-    console.log('====================================');
+    log("Image source path: ", response.Body);
     // getting cache control
     const cacheControl = response.CacheControl || DEFAULT_CACHE_CONTROL;
     // creating shartp image blob using Sharp Library
     for (const size of sizes) {
         const image = await sharp(response.Body).resize(size.width, null);
+        const metadata = await image.metadata();
+
+        size.height = Math.floor(size.width / metadata.width * metadata.height);
+        log("Size", JSON.stringify(size));
         const buffer = await image.toBuffer();
+        log(buffer.length);
         await (async function imageEncoder(size, buffer) {
             if (imageType === ".jpg" || imageType === ".jpeg") {
                 await new Promise(function (resolve, reject) {
-                    inkjet.decode(buffer, async function (err, decoded) {
+                    inkjet.decode(buffer, async function (err, pixels) {
+                        // pixels: { width: number, height: number, data: Uint8Array }
+                        log("jpg pixels", pixels.data.length);
                         const dstnPath = size.destinationPath;
                         const sourceFolder = srcFolder.length > 0 ? srcFolder + '/' : '';
                         for (const { format, contentType, options } of formats) {
-                            // decoded: { width: number, height: number, data: Uint8Array }
+                            log("pixels.height", pixels.height)
                             if (format === "avif") {
                                 const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
                                 let module = await avif_enc();
+                                // Hack to get large images optimization in avif
+                                options.speed = srcKey.includes('/background/') ? 10 : options.speed;
                                 let imageData = await module.encode(
-                                    decoded.data,
+                                    pixels.data,
                                     size.width,
-                                    size.width, // need to find the exact height of image and pass here
+                                    size.height,
                                     options);
+                                log("Avif Image Data", imageData.length);
                                 await s3
                                     .putObject({
                                         Bucket: dstBucket,
@@ -105,10 +98,11 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                                 const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
                                 let module = await webp_enc();
                                 let imageData = await module.encode(
-                                    decoded.data,
+                                    pixels.data,
                                     size.width,
-                                    size.width,// need to find the exact height of image and pass here
+                                    size.height,
                                     options);
+                                log("WebP Image Data", imageData.length);
                                 await s3
                                     .putObject({
                                         Bucket: dstBucket,
@@ -124,10 +118,11 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                                 const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${_ext}`;
                                 let module = await mozjpeg_enc();
                                 let imageData = await module.encode(
-                                    decoded.data,
+                                    pixels.data,
                                     size.width,
-                                    size.width,// need to find the exact height of image and pass here
+                                    size.height,
                                     options);
+                                log("JPG Image Data", imageData.length);
                                 await s3
                                     .putObject({
                                         Bucket: dstBucket,
@@ -147,17 +142,21 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
             } else if (imageType === ".png") {
                 await new Promise(function (resolve, reject) {
                     new PNG(buffer).decode(async function (pixels) {
+                        log("png pixels", pixels.length);
                         const dstnPath = size.destinationPath;
                         const sourceFolder = srcFolder.length > 0 ? srcFolder + '/' : '';
                         for (const { format, contentType, options } of formats) {
                             if (format === "avif") {
                                 const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
                                 let module = await avif_enc();
+                                // Hack to get large images optimization in avif
+                                options.speed = srcKey.includes('/background/') ? 10 : options.speed;
                                 let imageData = await module.encode(pixels,
                                     size.width,
-                                    size.width,// need to find the exact height of image and pass here
+                                    size.height,
                                     options
                                 );
+                                log("Avif Image Data", imageData.length);
                                 await s3.putObject({
                                     Bucket: dstBucket,
                                     Key: dstnKey,
@@ -171,9 +170,10 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                                 let module = await webp_enc();
                                 let imageData = await module.encode(pixels,
                                     size.width,
-                                    size.width,// need to find the exact height of image and pass here
+                                    size.height,
                                     options
                                 );
+                                log("WebP Image Data", imageData.length);
                                 await s3.putObject({
                                     Bucket: dstBucket,
                                     Key: dstnKey,
@@ -188,8 +188,9 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                                 let imageData = await module.encode(
                                     pixels,
                                     size.width,
-                                    size.width,
+                                    size.height,
                                     options);
+                                log("jpg Image Data", imageData.length);
                                 await s3
                                     .putObject({
                                         Bucket: dstBucket,

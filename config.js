@@ -1,8 +1,10 @@
 // setting image sizes to be created
 
-const _4096px = { width: 4096, destinationPath: '4096w' };
-const _2560px = { width: 2560, destinationPath: '2560w' };
-const _1080px = { width: 1080, destinationPath: '1080w' };
+const _3840px = { width: 3840, destinationPath: '4k' };
+const _2560px = { width: 2560, destinationPath: '2k' };
+const _1920px = { width: 1920, destinationPath: 'fhd' };
+const _1280px = { width: 1280, destinationPath: 'hd' };
+const _720px = { width: 720, destinationPath: '720w' };
 const _640px = { width: 640, destinationPath: '640w' };
 const _480px = { width: 480, destinationPath: '480w' };
 const _420px = { width: 420, destinationPath: '420w' };
@@ -16,7 +18,7 @@ const jpg = {
     format: 'jpg',
     contentType: 'image/jpeg',
     options: {
-        quality: 70,
+        quality: 75,
         baseline: false,
         arithmetic: false,
         progressive: true,
@@ -50,14 +52,14 @@ const avif = {
     options: {
         minQuantizer: 33,
         maxQuantizer: 63,
-        minQuantizerAlpha: 33,
+        minQuantizerAlpha: 1,
         maxQuantizerAlpha: 63,
         tileColsLog2: 0,
         tileRowsLog2: 0,
-        speed: 8,
-        subsample: 1
-    }
-}
+        speed: 6,
+        subsample: 1,
+    },
+};
 
 const webp = {
     format: 'webp',
@@ -66,7 +68,7 @@ const webp = {
         quality: 75,
         target_size: 0,
         target_PSNR: 0,
-        method: 4,
+        method: 6,
         sns_strength: 50,
         filter_strength: 60,
         filter_sharpness: 0,
@@ -89,12 +91,11 @@ const webp = {
         low_memory: 0,
         near_lossless: 100,
         use_delta_palette: 0,
-        use_sharp_yuv: 0
+        use_sharp_yuv: 0,
     },
 };
 
-exports.backgroundOnly = [2560, 1080];
+exports.backgroundOnly = [3840, 2560, 1920, 1280, 720];
 
-exports.sizesArray = [_2560px, _1080px, _640px, _480px, _420px, _360px, _300px, _240px, _180px, _140px];
-// exports.formats = [jpg, png, webp];
+exports.sizesArray = [_3840px, _2560px, _1920px, _1280px, _720px, _640px, _480px, _420px, _360px, _300px, _240px, _180px, _140px];
 exports.formats = [avif, webp, jpg];

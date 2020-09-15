@@ -4,13 +4,8 @@ var fs = require('fs');
 var cacheControlIn;
 var cacheControlOut;
 
-var consoleLogger = console.log; //(...args) => console.log(...args);
+var consoleLogger = (...args) => console.log(...args);
 
-console.log = function (arg) {
-    if (arg.startsWith('Successfully') || arg.startsWith('Error')) {
-        consoleLogger(arg);
-    }
-};
 
 AWS.S3.prototype.getObject = function (req) {
     return {
@@ -98,11 +93,11 @@ async function testCacheControlFail() {
 }
 
 const backgroundImageSource = [
-    '__tests__/testdata/in/templateMobile-icon.jpg',
-    '/background/templateMobile-icon.jpg',
+    '__tests__/testdata/in/4k.jpg',
+    '/background/4k.jpg',
     '__tests__/testdata/out',
     'mobile-icon',
-    'templateMobile-icon',
+    '4k',
     '.jpg',
 ];
 
