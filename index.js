@@ -45,7 +45,7 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
     }
 
     let sizes = srcKey.includes('/background/')
-        ? sizesArray
+        ? sizesArray.filter((s) => backgroundOnly.includes(s.width))
         : sizesArray.filter((s) => !backgroundOnly.includes(s.width));
 
     // getting the soruce image from s3 bucket

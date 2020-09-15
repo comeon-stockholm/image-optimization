@@ -20,13 +20,13 @@ webp
 and sizes
 
 ```
-640px, 480px, 420px, 360px, 300px, 240px, 180px, 140px
+ 640px, 480px, 420px, 360px, 300px, 240px, 180px, 140px
 ```
 
 For Backgrounds
 
 ```
-2560px, 1080px
+4k, 2K, FHD, HD, 720P
 ```
 
 of an image
