@@ -130,6 +130,7 @@ function removeTestFiles() {
 }
 
 (async () => {
+    removeTestFiles();
     await testCustomSizes().catch(catchError);
     await testDefaultProcess().catch(catchError);
     await testMaxAgeOverride().catch(catchError);
