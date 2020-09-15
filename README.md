@@ -56,3 +56,17 @@ zip -r image-optimization.zip index.js config.js package.json node_modules
 ± Work in progress
 
 ~ Can be changed to better encoders in future
+
+SAMPLE IMAGES GENERATED
+
+AVIF
+(33.5 KB)
+![AVIF](https://revolver-imageoptimization-lamda-srcset.s3-eu-west-1.amazonaws.com/images/640w/201.avif)
+
+WEBP
+(48.2 KB)
+![WEBP](https://revolver-imageoptimization-lamda-srcset.s3-eu-west-1.amazonaws.com/images/640w/201.webp)
+
+JPEG
+(52.8KB)
+![JPEG](https://revolver-imageoptimization-lamda-srcset.s3-eu-west-1.amazonaws.com/images/640w/201.jpeg)
