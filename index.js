@@ -53,18 +53,22 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
     log("Image source path: ", response.Body);
     // getting cache control
     const cacheControl = response.CacheControl || DEFAULT_CACHE_CONTROL;
-    // creating shartp image blob using Sharp Library
+    // creating sharp image blob using Sharp Library
     for (const size of sizes) {
         const image = await sharp(response.Body).resize(size.width, null);
+        //getting metadata of the image
         const metadata = await image.metadata();
-
+        //calculating height based on aspect ratio
         size.height = Math.floor(size.width / metadata.width * metadata.height);
         log("Size", JSON.stringify(size));
+
         const buffer = await image.toBuffer();
         log(buffer.length);
+
         await (async function imageEncoder(size, buffer) {
             if (imageType === ".jpg" || imageType === ".jpeg") {
                 await new Promise(function (resolve, reject) {
+                    // converting jpg image to pixels clampped to 0-255 Uint8Array
                     inkjet.decode(buffer, async function (err, pixels) {
                         // pixels: { width: number, height: number, data: Uint8Array }
                         log("jpg pixels", pixels.data.length);
@@ -141,6 +145,7 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                 });
             } else if (imageType === ".png") {
                 await new Promise(function (resolve, reject) {
+                    // converting png image to pixels clampped to 0-255 Uint8Array
                     new PNG(buffer).decode(async function (pixels) {
                         log("png pixels", pixels.length);
                         const dstnPath = size.destinationPath;
