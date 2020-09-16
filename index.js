@@ -73,7 +73,7 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                         // pixels: { width: number, height: number, data: Uint8Array }
                         log("jpg pixels", pixels.data.length);
                         const dstnPath = size.destinationPath;
-                        const sourceFolder = srcFolder.length > 0 ? srcFolder + '/' : '';
+                        const sourceFolder = srcFolder.length > 0 && srcFolder !== "." ? srcFolder + '/' : '';
                         for (let { format, contentType, options } of formats) {
                             log("pixels.height", pixels.height)
                             if (format === "avif") {
