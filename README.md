@@ -11,10 +11,10 @@ Before encoding need to convert the image buffers to unit8Clipped pixels array f
 We are getting awesome results for AVIF, WEBP and JPEG images 💡
 
 ```
-avif
-jpg
+avif (creates really small sized images for big resolution encoding)
+jpg (mozjpeg encoder creates progressive jpeg with really good quality and compression)
 png±
-webp
+webp (creates quality images with very less size. But not progressive)
 ```
 
 and sizes
@@ -43,19 +43,9 @@ npm run test
 
 ```
 npm install
-rm -rf node_modules/sharp
-npm install --arch=x64 --platform=linux sharp
+npm run zip
+upload the image-optimization-wasm(date).zip to lamda in aws
 ```
-
-Create a zip file and upload to lamda
-
-```
-zip -r image-optimization.zip index.js config.js package.json node_modules
-```
-
-± Work in progress
-
-~ Can be changed to better encoders in future
 
 SAMPLE IMAGES GENERATED
 
@@ -70,3 +60,6 @@ WEBP
 JPEG
 (52.8KB)
 ![JPEG](https://revolver-imageoptimization-lamda-srcset.s3-eu-west-1.amazonaws.com/images/640w/201.jpeg)
+
+± Work in progress
+~ Can be changed to better encoders in future

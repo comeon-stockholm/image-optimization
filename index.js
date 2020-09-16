@@ -15,7 +15,7 @@ const PNG = require('png-js');
 const s3 = new AWS.S3();
 // getting configurations from config file
 // later can move to environment varibale make this a default fallback
-const { sizesArray, formats, backgroundOnly } = require('./config');
+const { sizesArray, formats, backgroundOnly, backgroundPath } = require('./config');
 
 // default cache if cache is not set
 const DEFAULT_CACHE_CONTROL = 'max-age=31536000';
@@ -44,7 +44,7 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
         return;
     }
 
-    let sizes = srcKey.includes('/background/')
+    let sizes = srcKey.includes(backgroundPath)
         ? sizesArray.filter((s) => backgroundOnly.includes(s.width))
         : sizesArray.filter((s) => !backgroundOnly.includes(s.width));
 
@@ -74,13 +74,12 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                         log("jpg pixels", pixels.data.length);
                         const dstnPath = size.destinationPath;
                         const sourceFolder = srcFolder.length > 0 ? srcFolder + '/' : '';
-                        for (const { format, contentType, options } of formats) {
+                        for (let { format, contentType, options } of formats) {
                             log("pixels.height", pixels.height)
                             if (format === "avif") {
                                 const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
                                 let module = await avif_enc();
-                                // Hack to get large images optimization in avif
-                                options.speed = srcKey.includes('/background/') ? 10 : options.speed;
+                                log(options);
                                 let imageData = await module.encode(
                                     pixels.data,
                                     size.width,
@@ -150,12 +149,23 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
                         log("png pixels", pixels.length);
                         const dstnPath = size.destinationPath;
                         const sourceFolder = srcFolder.length > 0 ? srcFolder + '/' : '';
-                        for (const { format, contentType, options } of formats) {
+                        for (let { format, contentType, options } of formats) {
                             if (format === "avif") {
                                 const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
                                 let module = await avif_enc();
                                 // Hack to get large images optimization in avif
-                                options.speed = srcKey.includes('/background/') ? 10 : options.speed;
+                                if (srcKey.includes(backgroundPath)) {
+                                    options = {
+                                        minQuantizer: 30,
+                                        maxQuantizer: 50,
+                                        minQuantizerAlpha: 0,
+                                        maxQuantizerAlpha: 62,
+                                        tileColsLog2: 0,
+                                        tileRowsLog2: 0,
+                                        speed: 8,
+                                        subsample: 1,
+                                    }
+                                };
                                 let imageData = await module.encode(pixels,
                                     size.width,
                                     size.height,

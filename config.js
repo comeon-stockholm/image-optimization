@@ -51,12 +51,12 @@ const avif = {
     contentType: 'image/avif',
     options: {
         minQuantizer: 33,
-        maxQuantizer: 63,
-        minQuantizerAlpha: 1,
+        maxQuantizer: 50,
+        minQuantizerAlpha: 0,
         maxQuantizerAlpha: 63,
         tileColsLog2: 0,
         tileRowsLog2: 0,
-        speed: 6,
+        speed: 7,
         subsample: 1,
     },
 };
@@ -65,7 +65,7 @@ const webp = {
     format: 'webp',
     contentType: 'image/webp',
     options: {
-        quality: 75,
+        quality: 70,
         target_size: 0,
         target_PSNR: 0,
         method: 6,
@@ -96,6 +96,6 @@ const webp = {
 };
 
 exports.backgroundOnly = [3840, 2560, 1920, 1280, 720];
-
 exports.sizesArray = [_3840px, _2560px, _1920px, _1280px, _720px, _640px, _480px, _420px, _360px, _300px, _240px, _180px, _140px];
 exports.formats = [avif, webp, jpg];
+exports.backgroundPath = "background/";
