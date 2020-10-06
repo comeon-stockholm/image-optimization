@@ -2,24 +2,13 @@
 #include <emscripten/val.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <stdexcept>
-
 #include "src/webp/encode.h"
-
-typedef unsigned long size_t;
-typedef unsigned char byte;
 
 using namespace emscripten;
 
 int version() {
   return WebPGetEncoderVersion();
-}
-byte* image_buffer;
-size_t write_off;
-void write_to_buffer(void* context, void* data, int n) {
-  memcpy(image_buffer + write_off, data, n);
-  write_off += n;
 }
 
 thread_local const val Uint8Array = val::global("Uint8Array");
@@ -46,10 +35,10 @@ val encode(std::string img, int width, int height, WebPConfig config) {
 
   WebPMemoryWriterInit(&wrt);
 
-  ok = WebPEncode(&config, &pic);
-  // WebPPictureFree(&pic);
+  ok = WebPPictureImportRGBA(&pic, img_in, width * 4) && WebPEncode(&config, &pic);
+  WebPPictureFree(&pic);
   val js_result = ok ? Uint8Array.new_(typed_memory_view(wrt.size, wrt.mem)) : val::null();
-  // WebPMemoryWriterClear(&wrt);
+  WebPMemoryWriterClear(&wrt);
   return js_result;
 }
 

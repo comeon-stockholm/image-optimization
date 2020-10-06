@@ -6,7 +6,6 @@ var cacheControlOut;
 
 var consoleLogger = (...args) => console.log(...args);
 
-
 AWS.S3.prototype.getObject = function (req) {
     return {
         promise: () => Promise.resolve({ Body: req.Bucket, ContentType: 'image/jpeg', CacheControl: cacheControlIn }),
@@ -53,7 +52,7 @@ var tests = [
         'mobile-icon',
         'Mobile-luckyzoiac',
         '.jpeg',
-    ]
+    ],
 ];
 
 async function testCustomSizes() {
@@ -93,11 +92,11 @@ async function testCacheControlFail() {
 }
 
 const backgroundImageSource = [
-    '__tests__/testdata/in/4k.jpg',
-    '/background/4k.jpg',
+    '__tests__/testdata/in/large-image.jpg',
+    '/background/large-image.jpg',
     '__tests__/testdata/out',
     'mobile-icon',
-    '4k',
+    'large-image',
     '.jpg',
 ];
 
@@ -116,7 +115,7 @@ function catchError(err) {
 }
 
 function removeTestFiles() {
-    consoleLogger("Cleaning up");
+    consoleLogger('Cleaning up');
     fs.readdirSync('./__tests__/testdata/out').forEach((path) => {
         if (fs.statSync(`./__tests__/testdata/out/${path}`).isDirectory()) {
             fs.readdirSync(`./__tests__/testdata/out/${path}`).forEach((file) => {
@@ -126,7 +125,7 @@ function removeTestFiles() {
             });
         }
     });
-    consoleLogger("Successfully cleaned up generated test files 👍🏻 ")
+    consoleLogger('Successfully cleaned up generated test files 👍🏻 ');
 }
 
 (async () => {
