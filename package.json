@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "sharp": "rm -rf node_modules/sharp && npm install sharp",
-        "test": "node __tests__/resize.test.js",
+        "test": "node __tests__/resize.test.js --experimental-wasm-threads --experimental-wasm-bulk-memory",
         "prezip": "rm -rf node_modules/sharp && rm -rf image-optimization-wasm*.zip && npm install --arch=x64 --platform=linux sharp",
         "zip": "npm run prezip && zip -r image-optimization-wasm-$(date +'%Y-%m-%d').zip index.js config.js package.json node_modules codecs"
     },

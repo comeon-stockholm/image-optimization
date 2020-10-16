@@ -1,3 +1,4 @@
+'use strict';
 const path = require('path');
 const AWS = require('aws-sdk');
 const util = require('util');
@@ -19,8 +20,115 @@ const { sizesArray, formats, backgroundOnly, backgroundPaths } = require('./conf
 // default cache if cache is not set
 const DEFAULT_CACHE_CONTROL = 'max-age=31536000';
 
+const checkIfBackgroundImage = (srcKey) => backgroundPaths.some((backgroundPath) => srcKey.includes(backgroundPath));
+
+const saveImage = async (dstBucket, dstnKey, imageData, cacheControl, contentType) =>
+    s3
+        .putObject({
+            Bucket: dstBucket,
+            Key: dstnKey,
+            Body: Buffer.from(imageData),
+            CacheControl: cacheControl,
+            ContentType: contentType,
+        })
+        .promise();
+
+const encodeAndSave = async (
+    rawImageData,
+    imageType,
+    size,
+    sourceFolder,
+    srcFile,
+    srcKey,
+    dstBucket,
+    dstnPath,
+    cacheControl
+) => {
+    for (let { format, contentType, options, speedOptions } of formats) {
+        if (format === 'avif') {
+            const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
+            let module = await avif_enc();
+            let imageData;
+            if (checkIfBackgroundImage(srcKey)) {
+                imageData = await module.encode(rawImageData, size.width, size.height, speedOptions);
+            } else {
+                imageData = await module.encode(rawImageData, size.width, size.height, options);
+            }
+            log('Avif Image Data', imageData.length);
+            log(process.memoryUsage());
+            await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType);
+            log(`Successfully processed ${dstBucket}/${dstnKey}`);
+        } else if (format === 'webp') {
+            const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
+            let module = await webp_enc();
+            let imageData = await module.encode(rawImageData, size.width, size.height, options);
+            log('WebP Image Data', imageData.length);
+            log(process.memoryUsage());
+            await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType);
+            log(`Successfully processed ${dstBucket}/${dstnKey}`);
+        } else if (format === 'jpg') {
+            let _ext = imageType === '.jpeg' ? 'jpeg' : format;
+            const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${_ext}`;
+            let module = await mozjpeg_enc();
+            let imageData = await module.encode(rawImageData, size.width, size.height, options);
+            log('JPG Image Data', imageData.length);
+            log(process.memoryUsage());
+            await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType);
+            log(`Successfully processed ${dstBucket}/${dstnKey}`);
+        }
+    }
+};
+
+const imageEncoder = async (size, buffer, srcFolder, imageType, srcFile, srcKey, dstBucket, cacheControl) => {
+    const dstnPath = size.destinationPath;
+    const sourceFolder = srcFolder.length > 0 && srcFolder.trim() !== '.' ? srcFolder + '/' : '';
+    if (imageType === '.jpg' || imageType === '.jpeg') {
+        await new Promise(function (resolve, reject) {
+            // converting jpg image to pixels clampped to 0-255 Uint8Array
+            inkjet.decode(buffer, async function (err, pixels) {
+                // pixels: { width: number, height: number, data: Uint8Array }
+                log('jpg pixels', pixels.data.length);
+                const rawImageData = pixels.data;
+                log('pixels.height', pixels.height);
+                await encodeAndSave(
+                    rawImageData,
+                    imageType,
+                    size,
+                    sourceFolder,
+                    srcFile,
+                    srcKey,
+                    dstBucket,
+                    dstnPath,
+                    cacheControl
+                );
+                resolve();
+            });
+        });
+    } else if (imageType === '.png') {
+        await new Promise(function (resolve, reject) {
+            // converting png image to pixels clampped to 0-255 Uint8Array
+            new PNG(buffer).decode(async function (rawImageData) {
+                log('png pixels', rawImageData.length);
+                await encodeAndSave(
+                    rawImageData,
+                    imageType,
+                    size,
+                    sourceFolder,
+                    srcFile,
+                    srcKey,
+                    dstBucket,
+                    dstnPath,
+                    cacheControl
+                );
+                resolve();
+            });
+        });
+    }
+};
+
 // Image processing
 async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, imageType) {
+    require('events').EventEmitter.defaultMaxListeners = 1000;
     log('srcBucket:\n', srcBucket);
     log('srcKey:\n', srcKey);
     log('srcFolder:\n', srcFolder);
@@ -29,14 +137,7 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
     log('imageType\n', imageType);
 
     // checking if the file is an image else skip processing
-    if (
-        imageType == '.jpg' ||
-        imageType == '.jpeg' ||
-        imageType == '.png' ||
-        imageType == '.gif' ||
-        imageType == '.swf' ||
-        imageType == '.eps'
-    ) {
+    if (imageType == '.jpg' || imageType == '.jpeg' || imageType == '.png') {
         log('imageType to be processed:\n', imageType);
     } else {
         log(`skipping non-image type: ${srcKey}`);
@@ -47,16 +148,6 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
         ? sizesArray.filter((s) => backgroundOnly.includes(s.width))
         : sizesArray.filter((s) => !backgroundOnly.includes(s.width));
 
-    const saveImage = async (dstBucket, dstnKey, imageData, cacheControl, contentType) =>
-        s3
-            .putObject({
-                Bucket: dstBucket,
-                Key: dstnKey,
-                Body: Buffer.from(imageData),
-                CacheControl: cacheControl,
-                ContentType: contentType,
-            })
-            .promise();
     // getting the soruce image from s3 bucket
     const response = await s3.getObject({ Bucket: srcBucket, Key: srcKey }).promise();
     // log('Image source path: ', response.Body);
@@ -70,163 +161,9 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
         //calculating height based on aspect ratio
         size.height = Math.floor((size.width / metadata.width) * metadata.height);
         log('Size', JSON.stringify(size));
-
         const buffer = await image.toBuffer();
         log(buffer.length);
-
-        await (async function imageEncoder(size, buffer) {
-            const dstnPath = size.destinationPath;
-            const sourceFolder = srcFolder.length > 0 && srcFolder.trim() !== '.' ? srcFolder + '/' : '';
-            if (imageType === '.jpg' || imageType === '.jpeg') {
-                await new Promise(function (resolve, reject) {
-                    // converting jpg image to pixels clampped to 0-255 Uint8Array
-                    inkjet.decode(buffer, async function (err, pixels) {
-                        // pixels: { width: number, height: number, data: Uint8Array }
-                        log('jpg pixels', pixels.data.length);
-                        for (let { format, contentType, options } of formats) {
-                            log('pixels.height', pixels.height);
-                            if (format === 'avif') {
-                                const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
-                                let module = await avif_enc();
-                                if (backgroundPaths.some((backgroundPath) => srcKey.includes(backgroundPath))) {
-                                    options = {
-                                        minQuantizer: 30,
-                                        maxQuantizer: 50,
-                                        minQuantizerAlpha: 0,
-                                        maxQuantizerAlpha: 62,
-                                        tileColsLog2: 0,
-                                        tileRowsLog2: 0,
-                                        speed: 8,
-                                        subsample: 1,
-                                    };
-                                }
-                                // log(options);
-                                let imageData = await module.encode(pixels.data, size.width, size.height, options);
-                                log('Avif Image Data', imageData.length);
-                                // await s3
-                                //     .putObject({
-                                //         Bucket: dstBucket,
-                                //         Key: dstnKey,
-                                //         Body: Buffer.from(imageData),
-                                //         CacheControl: cacheControl,
-                                //         ContentType: contentType,
-                                //     })
-                                //     .promise();
-                                await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType);
-
-                                log(`Successfully processed ${dstBucket}/${dstnKey}`);
-                            } else if (format === 'webp') {
-                                const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
-                                let module = await webp_enc();
-                                let imageData = await module.encode(pixels.data, size.width, size.height, options);
-                                log('WebP Image Data', imageData.length);
-                                // await s3
-                                //     .putObject({
-                                //         Bucket: dstBucket,
-                                //         Key: dstnKey,
-                                //         Body: Buffer.from(imageData),
-                                //         CacheControl: cacheControl,
-                                //         ContentType: contentType,
-                                //     })
-                                //     .promise();
-                                await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType);
-                                log(`Successfully processed ${dstBucket}/${dstnKey}`);
-                            } else if (format === 'jpg') {
-                                let _ext = imageType === '.jpeg' ? 'jpeg' : format;
-                                const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${_ext}`;
-                                let module = await mozjpeg_enc();
-                                let imageData = await module.encode(pixels.data, size.width, size.height, options);
-                                log('JPG Image Data', imageData.length);
-                                // await s3
-                                //     .putObject({
-                                //         Bucket: dstBucket,
-                                //         Key: dstnKey,
-                                //         Body: Buffer.from(imageData),
-                                //         CacheControl: cacheControl,
-                                //         ContentType: contentType,
-                                //     })
-                                //     .promise();
-                                await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType);
-                                log(`Successfully processed ${dstBucket}/${dstnKey}`);
-                            }
-                        }
-                        resolve();
-                    });
-                });
-            } else if (imageType === '.png') {
-                await new Promise(function (resolve, reject) {
-                    // converting png image to pixels clampped to 0-255 Uint8Array
-                    new PNG(buffer).decode(async function (pixels) {
-                        log('png pixels', pixels.length);
-                        for (let { format, contentType, options } of formats) {
-                            if (format === 'avif') {
-                                const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
-                                let module = await avif_enc();
-                                // Hack to get large images optimization in avif
-                                if (backgroundPaths.some((backgroundPath) => srcKey.includes(backgroundPath))) {
-                                    options = {
-                                        minQuantizer: 30,
-                                        maxQuantizer: 50,
-                                        minQuantizerAlpha: 0,
-                                        maxQuantizerAlpha: 62,
-                                        tileColsLog2: 0,
-                                        tileRowsLog2: 0,
-                                        speed: 8,
-                                        subsample: 1,
-                                    };
-                                }
-                                let imageData = await module.encode(pixels, size.width, size.height, options);
-                                log('Avif Image Data', imageData.length);
-                                // await s3
-                                //     .putObject({
-                                //         Bucket: dstBucket,
-                                //         Key: dstnKey,
-                                //         Body: Buffer.from(imageData),
-                                //         CacheControl: cacheControl,
-                                //         ContentType: contentType,
-                                //     })
-                                //     .promise();
-                                await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType);
-                                log(`Successfully processed avif ${dstBucket}/${dstnKey}`);
-                            } else if (format === 'webp') {
-                                const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
-                                let module = await webp_enc();
-                                let imageData = await module.encode(pixels, size.width, size.height, options);
-                                log('WebP Image Data', imageData.length);
-                                // await s3
-                                //     .putObject({
-                                //         Bucket: dstBucket,
-                                //         Key: dstnKey,
-                                //         Body: Buffer.from(imageData),
-                                //         CacheControl: cacheControl,
-                                //         ContentType: contentType,
-                                //     })
-                                //     .promise();
-                                await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType);
-                                log(`Successfully processed webp ${dstBucket}/${dstnKey}`);
-                            } else if (format === 'jpg') {
-                                const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${format}`;
-                                let module = await mozjpeg_enc();
-                                let imageData = await module.encode(pixels, size.width, size.height, options);
-                                log('jpg Image Data', imageData.length);
-                                // await s3
-                                //     .putObject({
-                                //         Bucket: dstBucket,
-                                //         Key: dstnKey,
-                                //         Body: Buffer.from(imageData),
-                                //         CacheControl: cacheControl,
-                                //         ContentType: contentType,
-                                //     })
-                                //     .promise();
-                                await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType, format);
-                                log(`Successfully processed jpg ${dstBucket}/${dstnKey}`);
-                            }
-                        }
-                        resolve();
-                    });
-                });
-            }
-        })(size, buffer);
+        await imageEncoder(size, buffer, srcFolder, imageType, srcFile, srcKey, dstBucket, cacheControl);
     }
 }
 

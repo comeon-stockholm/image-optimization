@@ -62,6 +62,16 @@ const avif = {
         speed: 7,
         subsample: 1,
     },
+    speedOptions: {
+        minQuantizer: 30,
+        maxQuantizer: 50,
+        minQuantizerAlpha: 0,
+        maxQuantizerAlpha: 62,
+        tileColsLog2: 0,
+        tileRowsLog2: 0,
+        speed: 9,
+        subsample: 1,
+    },
 };
 
 const webp = {
@@ -98,23 +108,23 @@ const webp = {
     },
 };
 
-exports.backgroundOnly = [2560, 1920, 1280, 1440, 1366];
+exports.backgroundOnly = [1366, 1440, 1280, 1920, 2560];
 exports.sizesArray = [
     _1280px,
     _1366px,
     _1440px,
     _1920px,
     _2560px,
-    _980px,
-    _720px,
-    _640px,
-    _480px,
-    _420px,
-    _360px,
-    _300px,
-    _240px,
-    _180px,
     _140px,
+    _180px,
+    _240px,
+    _300px,
+    _360px,
+    _420px,
+    _480px,
+    _640px,
+    _720px,
+    _980px,
 ];
-exports.formats = [avif, webp, jpg];
+exports.formats = [webp, jpg, avif];
 exports.backgroundPaths = ['background/', 'game_backgrounds/'];
