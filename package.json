@@ -27,7 +27,7 @@
     },
     "homepage": "https://github.com/comeon-group/image-optimization#readme",
     "dependencies": {
-        "aws-sdk": "^2.751.0",
+        "aws-sdk": "^2.787.0",
         "path": "^0.12.7",
         "sharp": "^0.25.4",
         "util": "^0.12.3"
