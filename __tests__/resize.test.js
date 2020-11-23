@@ -55,12 +55,6 @@ var tests = [
     ],
 ];
 
-async function testCustomSizes() {
-    consoleLogger('\nTesting custom sizes');
-    cacheControlOut = 'max-age=31536000';
-    var value = tests[0];
-    await lambda.processImage(value[0], value[1], value[2], value[3], value[4], value[5]);
-}
 async function testDefaultProcess() {
     consoleLogger('\nTesting default conversions');
     cacheControlIn = undefined;
@@ -130,7 +124,6 @@ function removeTestFiles() {
 
 (async () => {
     removeTestFiles();
-    await testCustomSizes().catch(catchError);
     await testDefaultProcess().catch(catchError);
     await testMaxAgeOverride().catch(catchError);
     await testbackgroundImageSource().catch(catchError);

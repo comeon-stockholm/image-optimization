@@ -36,6 +36,5 @@
         "png-js": "^1.0.0",
         "sharp": "^0.25.4",
         "util": "^0.12.3"
-    },
-    "devDependencies": {}
+    }
 }

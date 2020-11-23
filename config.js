@@ -1,18 +1,13 @@
 // setting image sizes to be created
 
 // const _3840px = { width: 3840, destinationPath: '3840w' };
+const _4096px = { width: 3840, destinationPath: '4096w' };
 const _2560px = { width: 2560, destinationPath: '2560w' };
-const _1920px = { width: 1920, destinationPath: '1920w' };
-const _1440px = { width: 1440, destinationPath: '1440w' };
-const _1366px = { width: 1366, destinationPath: '1366w' };
-const _1280px = { width: 1280, destinationPath: '1280w' };
+const _1080px = { width: 1080, destinationPath: '1080w' };
 const _980px = { width: 980, destinationPath: '980w' };
-const _720px = { width: 720, destinationPath: '720w' };
+const _860px = { width: 860, destinationPath: '860w' };
 const _640px = { width: 640, destinationPath: '640w' };
 const _480px = { width: 480, destinationPath: '480w' };
-const _420px = { width: 420, destinationPath: '420w' };
-const _360px = { width: 360, destinationPath: '360w' };
-const _300px = { width: 300, destinationPath: '300w' };
 const _240px = { width: 240, destinationPath: '240w' };
 const _180px = { width: 180, destinationPath: '180w' };
 const _140px = { width: 140, destinationPath: '140w' };
@@ -108,23 +103,7 @@ const webp = {
     },
 };
 
-exports.backgroundOnly = [1366, 1440, 1280, 1920, 2560];
-exports.sizesArray = [
-    _1280px,
-    _1366px,
-    _1440px,
-    _1920px,
-    _2560px,
-    _140px,
-    _180px,
-    _240px,
-    _300px,
-    _360px,
-    _420px,
-    _480px,
-    _640px,
-    _720px,
-    _980px,
-];
+exports.backgroundOnly = [480, 640, 860, 1080, 2560, 3840];
+exports.sizesArray = [_1080px, _2560px, _4096px, _140px, _180px, _240px, _480px, _640px, _860px, _980px];
 exports.formats = [webp, jpg, avif];
 exports.backgroundPaths = ['background/', 'game_backgrounds/'];

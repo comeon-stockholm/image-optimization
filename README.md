@@ -8,6 +8,8 @@ Using sharp~ library for resizing the image before encoding.
 
 Before encoding need to convert the image buffers to unit8Clipped pixels array for png and jpg for the wasm encoders to compress.
 
+The codecs are copied from the codecs folder of the sqooush app
+
 We are getting awesome results for AVIF, WEBP and JPEG images 💡
 
 ```
@@ -26,7 +28,7 @@ and sizes
 For Backgrounds
 
 ```
-4k, 2K, FHD, HD, 720P
+2K, FHD, HD, 720P
 ```
 
 of an image
