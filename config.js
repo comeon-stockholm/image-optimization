@@ -103,7 +103,7 @@ const webp = {
     },
 };
 
-exports.backgroundOnly = [480, 640, 860, 1080, 2560, 3840];
-exports.sizesArray = [_1080px, _2560px, _4096px, _140px, _180px, _240px, _480px, _640px, _860px, _980px];
+exports.backSizes = [_480px, _640px, _860px, _980px, _1080px, _2560px, _4096px];
+exports.sizes = [_140px, _180px, _240px, _480px, _640px, _860px, _980px];
 exports.formats = [webp, jpg, avif];
-exports.backgroundPaths = ['background/', 'game_backgrounds/'];
+exports.backgroundPaths = ['background/', 'game_backgrounds/', 'promotion/'];

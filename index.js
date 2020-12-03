@@ -4,6 +4,7 @@ const AWS = require('aws-sdk');
 const util = require('util');
 // image compression encoders
 const sharp = require('sharp');
+
 const webp_enc = require('./codecs/webp/enc/webp_enc.js');
 const mozjpeg_enc = require('./codecs/mozjpeg_enc/mozjpeg_enc.js');
 const avif_enc = require('./codecs/avif/enc/avif_enc.js');
@@ -15,7 +16,7 @@ const PNG = require('png-js');
 const s3 = new AWS.S3();
 // getting configurations from config file
 // later can move to environment varibale make this a default fallback
-const { sizesArray, formats, backgroundOnly, backgroundPaths } = require('./config');
+const { sizes, formats, backSizes, backgroundPaths } = require('./config');
 
 // default cache if cache is not set
 const DEFAULT_CACHE_CONTROL = 'max-age=31536000';
@@ -69,12 +70,17 @@ const encodeAndSave = async (
         } else if (format === 'jpg') {
             let _ext = imageType === '.jpeg' ? 'jpeg' : format;
             const dstnKey = `${sourceFolder}${dstnPath}/${srcFile}.${_ext}`;
+            // hack for png
+            const dstnKeyPng = `${sourceFolder}${dstnPath}/${srcFile}.png`;
             let module = await mozjpeg_enc();
             let imageData = await module.encode(rawImageData, size.width, size.height, options);
             log('JPG Image Data', imageData.length);
             log(process.memoryUsage());
             await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType);
+            // hack for png
+            await saveImage(dstBucket, dstnKeyPng, imageData, cacheControl, 'image/png');
             log(`Successfully processed ${dstBucket}/${dstnKey}`);
+            log(`Successfully processed ${dstBucket}/${dstnKeyPng}`);
         }
     }
 };
@@ -128,7 +134,7 @@ const imageEncoder = async (size, buffer, srcFolder, imageType, srcFile, srcKey,
 
 // Image processing
 async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, imageType) {
-    require('events').EventEmitter.defaultMaxListeners = 1000;
+    // require('events').EventEmitter.defaultMaxListeners = 1000;
     log('srcBucket:\n', srcBucket);
     log('srcKey:\n', srcKey);
     log('srcFolder:\n', srcFolder);
@@ -143,18 +149,17 @@ async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, im
         log(`skipping non-image type: ${srcKey}`);
         return;
     }
-
-    let sizes = backgroundPaths.some((backgroundPath) => srcKey.includes(backgroundPath))
-        ? sizesArray.filter((s) => backgroundOnly.includes(s.width))
-        : sizesArray.filter((s) => !backgroundOnly.includes(s.width));
+    // getting sizes for background or other image
+    let sizesArray = checkIfBackgroundImage(srcKey) ? backSizes : sizes;
 
     // getting the soruce image from s3 bucket
     const response = await s3.getObject({ Bucket: srcBucket, Key: srcKey }).promise();
+
     // log('Image source path: ', response.Body);
     // getting cache control
     const cacheControl = response.CacheControl || DEFAULT_CACHE_CONTROL;
     // creating sharp image blob using Sharp Library
-    for (const size of sizes) {
+    for (const size of sizesArray) {
         const image = await sharp(response.Body).resize(size.width, null);
         //getting metadata of the image
         const metadata = await image.metadata();
