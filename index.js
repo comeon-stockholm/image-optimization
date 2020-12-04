@@ -56,7 +56,7 @@ const encodeAndSave = async (
                 imageData = await module.encode(rawImageData, size.width, size.height, options);
             }
             log('Avif Image Data', imageData.length);
-            log(process.memoryUsage());
+            // log(process.memoryUsage());
             await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType);
             log(`Successfully processed ${dstBucket}/${dstnKey}`);
         } else if (format === 'webp') {
@@ -64,7 +64,7 @@ const encodeAndSave = async (
             let module = await webp_enc();
             let imageData = await module.encode(rawImageData, size.width, size.height, options);
             log('WebP Image Data', imageData.length);
-            log(process.memoryUsage());
+            // log(process.memoryUsage());
             await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType);
             log(`Successfully processed ${dstBucket}/${dstnKey}`);
         } else if (format === 'jpg') {
@@ -75,7 +75,7 @@ const encodeAndSave = async (
             let module = await mozjpeg_enc();
             let imageData = await module.encode(rawImageData, size.width, size.height, options);
             log('JPG Image Data', imageData.length);
-            log(process.memoryUsage());
+            // log(process.memoryUsage());
             await saveImage(dstBucket, dstnKey, imageData, cacheControl, contentType);
             // hack for png
             await saveImage(dstBucket, dstnKeyPng, imageData, cacheControl, 'image/png');
@@ -134,7 +134,7 @@ const imageEncoder = async (size, buffer, srcFolder, imageType, srcFile, srcKey,
 
 // Image processing
 async function processImage(srcBucket, srcKey, srcFolder, dstBucket, srcFile, imageType) {
-    // require('events').EventEmitter.defaultMaxListeners = 1000;
+    require('events').EventEmitter.defaultMaxListeners = 1000;
     log('srcBucket:\n', srcBucket);
     log('srcKey:\n', srcKey);
     log('srcFolder:\n', srcFolder);
